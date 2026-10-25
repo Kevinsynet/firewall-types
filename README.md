@@ -84,3 +84,13 @@ Sources: [NIST SP 800-41 Rev. 1](https://csrc.nist.gov/pubs/sp/800/41/r1/final) 
 Guided simulator update: JavaScript syntax and automated control-flow checks passed for run/replay, canceled-run isolation, control unlocking, unique control IDs and collapsed Advanced settings. Browser visual QA remains unverified under the environment restrictions described above.
 
 Packet journey update: packet positions are measured from the actual device centers and refreshed on resize. Sending, inspection and outcome stages show progress; blocked packets stop at the firewall, allowed packets disappear on server arrival. Reduced-motion preferences preserve stage feedback without motion. Automated geometry, allowed/blocked sequence and cancellation checks passed; visual browser verification remains pending.
+
+## Guided learning additions
+
+The existing nine sections, dashboard and brown/cream design remain. A four-step learning path connects Theory, Simulator, Assessment and Quiz. Simulator scenarios include everyday descriptions and optional allow/block predictions. Capability chips describe the selected educational model; unsupported capabilities are marked explicitly. Beginner mode keeps Advanced settings collapsed; Advanced mode opens them. A quick-help glossary explains packet, protocol, port, state, policy and threat terms.
+
+Results explain what happened, why, and a suggested next experiment, with expandable inspection steps. Compare firewalls shows two independently selectable architecture panels using a fixed snapshot of the same packet and rules; all six results remain available in an expandable list.
+
+Assessment and Quiz include a printable progress/completion report. It combines the latest completed assessment (saved locally) with the current completed quiz, lists missed topics and identifies incomplete work. Printing can also save a PDF through the browser print dialog. Starting a new assessment retains the previous completed assessment score until the new set finishes; restarting the quiz marks that component incomplete. The report is a learning record, not a certificate.
+
+Verification: syntax checks and automated report checks passed for incomplete states, combined scores, missed topics, six scenario stories, capability mappings and differing packet-filter/NGFW verdicts. Browser visual QA remains pending. Manual checks: follow each guide link; predict and replay a scenario; switch modes and architectures; compare two types; complete assessment and quiz; verify report scores and print preview.
