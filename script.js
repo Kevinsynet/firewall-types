@@ -71,10 +71,51 @@ function bindSimulator(){fillPacket();renderRules();renderLogs();$('#packet-form
 function comparison(){return intro('Choose the right inspection depth','These capabilities overlap in real products. Select a focus to compare the six architectures.')+`<div class="card"><label>Focus<select id="comparison-focus"><option value="all">All architectures</option><option value="content">Application / content aware</option><option value="state">Connection / session aware</option></select></label><div class="scroll"><table><thead><tr><th>Architecture</th><th>Primary visibility</th><th>Strength</th><th>Important limit</th></tr></thead><tbody id="comparison-body"></tbody></table></div><p style="font-size:11px;margin-top:18px">Higher inspection depth is not automatically better for every deployment. Policy, performance, protocol support and encryption all matter.</p><button data-go="simulator">Compare a live scenario →</button></div>`;}
 const compareData=[['Headers','Simple network policy','No payload or state analysis'],['Headers + flow state','Track permitted exchanges','Not inherently content aware'],['Session negotiation','Control session relay','No inherent payload analysis'],['Application protocol','Protocol and URL policies','Protocol support is limited'],['State + app + signatures','Layer multiple controls','Signatures and visibility have limits'],['HTTP application data','Protect web services','Non-HTTP traffic outside scope']];
 function renderComparison(){const filter=$('#comparison-focus').value;$('#comparison-body').innerHTML=keys.map((k,i)=>({k,i})).filter(({k})=>filter==='all'||(filter==='content'?['proxy','ngfw','waf']:['stateful','circuit','ngfw']).includes(k)).map(({i})=>`<tr><td><strong>${names[i]}</strong></td>${compareData[i].map(t=>`<td>${t}</td>`).join('')}</tr>`).join('');}
-const practical=[['A permitted web connection','Packet Filtering evaluates TCP port 443 with no threat flag.','packet',{}],['An SSH attempt','Stateful Inspection evaluates a new TCP connection to port 22.','stateful',{port:22,application:'SSH'}],['A tracked return flow','Stateful Inspection evaluates an established TCP flow on port 8443.','stateful',{port:8443,state:'established'}],['An allowed port, unsafe content','NGFW evaluates HTTPS on port 443 with the malware indicator.','ngfw',{threat:'malware'}],['A web attack','WAF evaluates HTTP on port 80 with a SQL injection indicator.','waf',{port:80,application:'HTTP',threat:'sqli'}]];
+const practicalBank=[
+ ['A permitted web connection','packet',{}],
+ ['An SSH attempt','stateful',{port:22,application:'SSH'}],
+ ['A tracked return flow','stateful',{port:8443,state:'established'}],
+ ['An allowed port, unsafe content','ngfw',{threat:'malware'}],
+ ['A web attack','waf',{port:80,application:'HTTP',threat:'sqli'}],
+ ['A DNS lookup','packet',{protocol:'UDP',port:53,application:'DNS'}],
+ ['An unknown destination port','packet',{port:8080,application:'HTTP'}],
+ ['State without state tracking','packet',{port:8443,state:'established'}],
+ ['A suspicious connection state','stateful',{state:'invalid'}],
+ ['Content beyond header inspection','packet',{threat:'malware'}],
+ ['A failed session negotiation','circuit',{session:'failed'}],
+ ['A valid web circuit','circuit',{}],
+ ['UDP through a circuit gateway','circuit',{protocol:'UDP',port:53,application:'DNS'}],
+ ['A restricted proxy path','proxy',{path:'/admin/settings'}],
+ ['A public proxy path','proxy',{path:'/courses'}],
+ ['DNS through a web proxy','proxy',{protocol:'UDP',port:53,application:'DNS'}],
+ ['An unapproved application','ngfw',{application:'Other'}],
+ ['A clean tracked application','ngfw',{port:8443,state:'established'}],
+ ['A clean web request','waf',{path:'/courses'}],
+ ['Traffic outside web inspection','waf',{port:22,application:'SSH'}],
+ ['A script injection indicator','waf',{threat:'xss'}],
+ ['An attack in an established flow','ngfw',{state:'established',threat:'sqli'}],
+ ['A clean DNS application','ngfw',{protocol:'UDP',port:53,application:'DNS'}],
+ ['A new connection with no matching rule','stateful',{port:9000}]
+];
+let practical=[];
+let previousAssessment=storage.get('assessment-last',[]);
+if(!Array.isArray(previousAssessment))previousAssessment=[];
+function newAssessment(){
+ const candidates=practicalBank.map((_,i)=>i).filter(i=>!previousAssessment.includes(i));
+ for(let i=candidates.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[candidates[i],candidates[j]]=[candidates[j],candidates[i]];}
+ const selected=candidates.slice(0,5);
+ previousAssessment=selected;
+ storage.set('assessment-last',selected);
+ practical=selected.map(i=>{
+  const [title,type,changes]=practicalBank[i],p={...base,...changes};
+  const description=`${names[keys.indexOf(type)]} evaluates ${p.direction} ${p.protocol} traffic from ${p.source} to ${p.destination}, destination port ${p.port}. Tracked state: ${p.state}. Application: ${p.application}. Path: ${p.path}. Threat indicator: ${p.threat}. Session negotiation: ${p.session}.`;
+  return [title,description,type,changes];
+ });
+ assessments={};
+}
 let assessments={};
-function assessment(){return intro('Predict before you inspect','Five practical scenarios. Each uses the default policy, regardless of your simulator edits.')+`<div id="assessment-score" class="verdict">0 of 5 scenarios evaluated</div><div class="grid" style="margin-top:18px">${practical.map((p,i)=>`<article class="card"><span class="card-number">SCENARIO 0${i+1}</span><h3>${p[0]}</h3><p>${p[1]}</p><div class="actions"><button data-predict="${i}" data-answer="true">Allowed</button><button data-predict="${i}" data-answer="false">Blocked</button></div><p id="assessment-${i}" class="feedback-message" role="status"></p></article>`).join('')}</div><button id="restart-assessment" style="margin-top:18px">Restart assessment</button>`;}
-function gradeAssessment(i,answer){const p=practical[i],r=evaluate(p[2],{...base,...p[3]},defaults());assessments[i]=answer===r.allowed;$('#assessment-'+i).textContent=(assessments[i]?'Correct. ':'Not quite. ')+r.reason;$$(`[data-predict="${i}"]`).forEach(b=>{b.disabled=true;});const n=Object.keys(assessments).length;$('#assessment-score').textContent=`${n} of 5 evaluated · ${Object.values(assessments).filter(Boolean).length} correct${n===5?' · Assessment complete':''}`;}
+function assessment(){newAssessment();return intro('Predict before you inspect','Five fresh scenarios from a bank of 24. None repeat from your previous set. Default policy applies, regardless of simulator edits.')+`<div id="assessment-score" class="verdict">0 of 5 scenarios evaluated</div><div class="grid" style="margin-top:18px">${practical.map((p,i)=>`<article class="card"><span class="card-number">SCENARIO 0${i+1}</span><h3>${p[0]}</h3><p>${p[1]}</p><div class="actions"><button data-predict="${i}" data-answer="true">Allowed</button><button data-predict="${i}" data-answer="false">Blocked</button></div><p id="assessment-${i}" class="feedback-message" role="status"></p></article>`).join('')}</div><button id="restart-assessment" style="margin-top:18px">New questions ↻</button>`;}
+function gradeAssessment(i,answer){if(Object.hasOwn(assessments,i))return;const p=practical[i],r=evaluate(p[2],{...base,...p[3]},defaults());assessments[i]=answer===r.allowed;$('#assessment-'+i).textContent=(assessments[i]?'Correct. ':'Not quite. ')+r.reason;$$(`[data-predict="${i}"]`).forEach(b=>{b.disabled=true;});const n=Object.keys(assessments).length;$('#assessment-score').textContent=`${n} of 5 evaluated · ${Object.values(assessments).filter(Boolean).length} correct${n===5?' · Assessment complete':''}`;}
 const questions=[
  ['Which field can a basic packet filter directly match?',['Destination port','SQL query intent','User behavior','Decrypted web content'],0,'Packet filters match header fields, including addresses, protocol and ports.'],
  ['What distinguishes stateful inspection?',['It blocks every UDP packet','It tracks connections','It decrypts all traffic','It replaces authentication'],1,'Stateful inspection maintains context about flows and their state.'],

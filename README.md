@@ -21,7 +21,7 @@ Nine navigable sections: overview, expandable theory, procedure, simulator, inte
 
 The simulator supports six firewall architectures, ten packet/session inputs, six presets, editable ordered header rules, same-packet comparison, inspection traces and a timestamped, filterable log (latest 100 runs). Reset restores the packet, architecture and default rules; Clear log is separate. Run again to replay a packet.
 
-Five practical predictions use default rules independently of simulator changes. Ten MCQs provide immediate explanations, a final score and answer review. Restart controls reset each exercise. Quiz answers and section visits persist using `exp-fw-` localStorage keys. Feedback is validated and saved only locally, with a clear control. Logs, edited rules and assessment answers are session-only. Section progress measures exploration, not mastery.
+Each assessment draws five distinct scenarios from a 24-question bank, excluding all five from the previous set. Opening Assessment, reloading it, or selecting New questions starts a fresh set. Previous question IDs persist locally when storage is available. Practical predictions use default rules independently of simulator changes. Ten MCQs provide immediate explanations, a final score and answer review. Restart controls reset each exercise. Quiz answers and section visits persist using `exp-fw-` localStorage keys. Feedback is validated and saved only locally, with a clear control. Logs, edited rules and assessment answers are session-only. Section progress measures exploration, not mastery.
 
 ## Deterministic policy
 
@@ -65,7 +65,7 @@ Use defaults unless a row says otherwise.
 1. Open the local entry file offline; visit all nine sections and use keyboard navigation.
 2. Run each preset, compare all types and inspect reasons. Edit IP, port, action, direction and priorities; add/remove rules. Verify default-deny and equal-priority row ordering.
 3. Filter Allowed/Blocked logs, clear them and reset/replay the workbench.
-4. Complete the five assessment predictions (answers: Allowed, Blocked, Allowed, Blocked, Blocked); check scoring and restart.
+4. Complete five assessment predictions; verify each explanation against the displayed packet and default policy. Select New questions and verify five distinct questions with no overlap with the previous set; check that scoring resets. Reload and repeat.
 5. Answer all ten quiz questions; inspect explanations and final review. Reload midway to check saved progress. Restart.
 6. Submit short/blank feedback (rejected), save valid feedback, reload, then clear it. Test with browser storage disabled.
 7. Inspect layouts at 375px, 768px and desktop widths; confirm all controls remain reachable and rule tables scroll.
