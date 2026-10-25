@@ -11,3 +11,25 @@
 .running.blocked .packet{box-shadow:0 0 0 5px #ad494420}
 #topology{scroll-margin-top:25px}
 @media(max-width:760px){#advanced .rule{grid-template-columns:repeat(2,minmax(0,1fr));border:1px solid var(--line);border-radius:10px;padding:12px;gap:10px}#advanced .rules-inner{min-width:0}#advanced .rule input,#advanced .rule select{font-size:12px;padding:9px}#advanced .rule button{align-self:end}#advanced .rule label{font-size:11px}}
+/* Device-anchored packet journey */
+.topology{overflow:hidden;border-radius:14px}
+#packet-summary{margin-top:12px}
+.topology .packet{left:var(--packet-start,0px);top:var(--packet-y,50%);transform:translate(-50%,-50%);width:14px;height:14px;border:2px solid white;border-radius:4px;background:var(--brown);opacity:0;box-shadow:0 0 0 5px #976c5820;pointer-events:none}
+.topology.sending .packet{animation:packet-send .7s ease-in-out forwards}
+.topology.inspecting .packet{left:var(--packet-gate);opacity:1;background:var(--brown)}
+.topology.delivering .packet{background:var(--green);animation:packet-deliver .7s ease-in-out forwards}
+.topology.rejected .packet{left:var(--packet-gate);opacity:1;background:var(--red);box-shadow:0 0 0 6px #ad494420}
+.topology.rejected .packet:after{content:'×';position:absolute;inset:-4px;color:white;text-align:center;font:bold 16px/18px sans-serif}
+.topology.delivered .packet{left:var(--packet-end);opacity:0}
+.topology.inspecting .firewall{animation:gate-pulse .55s ease-in-out infinite alternate}
+.topology.delivered .node:last-of-type{border-color:var(--green);background:#edf5ef;box-shadow:0 0 0 4px #34705c12}
+.topology.rejected .firewall{background:var(--red);box-shadow:0 0 0 4px #ad494415}
+.journey{display:flex;gap:8px;justify-content:center;margin:8px 0}
+.journey span{flex:1;max-width:170px;padding:7px 9px;border-radius:7px;background:var(--cream);color:var(--muted);font-size:11px;text-align:center;border:1px solid var(--line)}
+.journey span.active{color:var(--dark);background:var(--tint);border-color:var(--brown);font-weight:700}
+.journey-status{text-align:center;font-size:12px;min-height:38px;margin:12px 0 0;color:var(--dark)}
+.scope-warning{border-top:1px solid #b8cdbc;padding-top:10px;font-weight:600}
+@keyframes packet-send{from{left:var(--packet-start);opacity:1}to{left:var(--packet-gate);opacity:1}}
+@keyframes packet-deliver{from{left:var(--packet-gate);opacity:1}90%{opacity:1}to{left:var(--packet-end);opacity:0}}
+@keyframes gate-pulse{from{box-shadow:0 0 0 3px #976c5810}to{box-shadow:0 0 0 9px #976c5830}}
+@media(prefers-reduced-motion:reduce){.topology.sending .packet{left:var(--packet-gate);opacity:1}.topology.delivering .packet{left:var(--packet-end);opacity:1}}
